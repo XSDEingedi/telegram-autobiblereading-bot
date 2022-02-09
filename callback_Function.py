@@ -1,7 +1,7 @@
 '''
 Author: Jonah Liu
 Date: 2022-01-26 12:01:57
-LastEditTime: 2022-01-28 12:32:44
+LastEditTime: 2022-02-09 16:02:42
 LastEditors: Jonah Liu
 Description: 
 
@@ -18,10 +18,11 @@ def callback_dummy(update: Updater, context: CallbackContext) -> None:
 '''
 
 
+from datetime import date
 import logging
 from telegram.ext import Updater,CallbackContext
 import telegram
-from functions import updateDB,findFiles
+from functions import updateDB,findFiles,getTodayBibleChapters,publishToTypecho
 import config 
 
 def callback_button(update: Updater, context: CallbackContext) -> None:
@@ -44,7 +45,7 @@ def callback_button(update: Updater, context: CallbackContext) -> None:
             logging.debug(filePrefix)
             logging.debug(fileLst)
             if len(fileLst)==0:
-                query.answer('No found file(s) about today')
+                context.bot.send_message(chat_id=chatid,text='No found file(s) about today')
                 return
             
             file_id = [context.bot.send_document(
@@ -69,7 +70,26 @@ def callback_button(update: Updater, context: CallbackContext) -> None:
                 parse_mode=telegram.ParseMode.HTML
                 )
     elif reply == 'EGD':
-        query.answer("功能还未开放")
+        query.answer()
+        context.bot.send_message(
+            chat_id = chatid,
+            text=f'<a href="{config.Site.url}">{config.Site.url}</a>',
+            parse_mode=telegram.ParseMode.HTML
+            )
     else:
         query.answer()
 
+
+def channel_callback(update: Updater, context: CallbackContext) -> None:
+    logging.debug("-----------------Channel CALLBACK-----------------")
+    logging.debug(update.channel_post.chat.id)
+    if update.channel_post.chat.id in config.channelIDs:
+        YBCC = getTodayBibleChapters(config.database)
+        title =  date.today().strftime('%Y年%m月%d日') + f' {YBCC[1]}:{YBCC[2]}-{YBCC[3]}'
+       
+        channelContent = update.channel_post.text
+        publishToTypecho(url=config.Site.rpcUrl,
+                        content=channelContent.replace('\n','\n\n'),
+                        title=title,
+                        username=config.Site.username,
+                        passwd=config.Site.password)

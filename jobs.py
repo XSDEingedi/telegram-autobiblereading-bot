@@ -1,16 +1,17 @@
 '''
 Author: Jonah Liu
 Date: 2022-01-25 19:21:23
-LastEditTime: 2022-01-28 12:30:54
+LastEditTime: 2022-02-09 15:46:40
 LastEditors: Jonah Liu
 Description: 
 '''
 
 from telegram import InlineKeyboardButton,InlineKeyboardMarkup
 from telegram.ext import Updater, CallbackContext
+import os
 
 # import important variable
-from functions import updateDB,getTodayBibleChapters,build_menu
+from functions import updateDB,getTodayBibleChapters,build_menu,getSystemInformation
 from datetime import date
 import config
 
@@ -54,14 +55,9 @@ def dailyBonjour(context:CallbackContext):
                             )
 
 def testReminder(context:CallbackContext):
-    adminID = 949189546
     config.todayCount = (date.today()-config.bibleStart).days + 1
 
-
-    context.bot.sendMessage(chat_id=adminID,
-                        text="[TEST]\n\n" + config.Msg.bonjourMsg.format(
-                                user="WHOM EVER CONCERN",
-                                todayDate=date.today().strftime('%Y年%m月%d日'),
-                                YBCC=getTodayBibleChapters(config.database),
-                                todayCount=config.todayCount  )
+    for adminID in config.adminIDs:
+        context.bot.sendMessage(chat_id=adminID,
+                        text='\n'.join(getSystemInformation())
                                 )

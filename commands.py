@@ -1,7 +1,7 @@
 '''
 Author: Jonah Liu
 Date: 2022-01-25 18:13:02
-LastEditTime: 2022-01-27 12:45:21
+LastEditTime: 2022-02-09 15:45:05
 LastEditors: Jonah Liu
 Description: commands for TeleBot
 '''
@@ -23,7 +23,7 @@ def start(update: Updater, context: CallbackContext) -> None:
 
 
 def subscribe(update: Updater, context: CallbackContext) -> None:
-    command = "INSERT OR IGNORE INTO USERS (CHAT_ID,START_DAY) VALUES (%d,date('now'))"%update.effective_chat.id
+    command = "INSERT OR IGNORE INTO USERS (CHAT_ID,START_DAY,ENCRY_NAME) VALUES (%d,date('now'),'%s')"%(update.effective_chat.id,update.effective_chat.first_name)
     updateDB(database,command)
     context.bot.send_message(chat_id=update.effective_chat.id, 
                              text=Msg.subscribRplMsg.format(
@@ -62,11 +62,16 @@ def today(update: Updater, context: CallbackContext) -> None:
 
 
 def checkin(update: Updater, context: CallbackContext) ->None:
-    cmdSelect ="SELECT START_DAY,LAST_DAY,CHECKED_DAY,IS_CHECKED FROM USERS WHERE CHAT_ID==%d"%update.effective_chat.id
+    # check ENCRY_NAME
+
+    cmdSelect ="SELECT START_DAY,LAST_DAY,CHECKED_DAY,IS_CHECKED,ENCRY_NAME FROM USERS WHERE CHAT_ID==%d"%update.effective_chat.id
     ret = updateDB(database,cmdSelect)[0]
 
     if ret:    
-        _,lastday,checkedDay,isChecked = ret
+        _,lastday,checkedDay,isChecked,EncryName = ret
+        if len(EncryName) == 0:
+            updateDB(database,"UPDATE USERS SET ENCRY_NAME='%s'"%update.effective_user.first_name)
+            
         startDay = list(map(int,_.split('-')))
         if isChecked:
             update.message.reply_text(Msg.alreadyChecked.format(user=update.effective_user.first_name))
@@ -74,11 +79,11 @@ def checkin(update: Updater, context: CallbackContext) ->None:
             cmdUpdate = "UPDATE USERS SET LAST_DAY=date('now'), CHECKED_DAY=%d, IS_CHECKED=True WHERE CHAT_ID == %d"%(checkedDay+1,update.effective_chat.id)
             updateDB(database,cmdUpdate)
             # checkpercentage = (checkedDay+1)/((date.today()-date(startDay[0],startDay[1],startDay[2])).days + 1)
-            update.message.reply_text(Msg.checkinRly.format(
+            update.message.reply_text(Msg.checkinRply.format(
                                         user = update.effective_user.first_name,
                                         checkedDay = checkedDay+1, 
                                         lastDay = lastday, 
-                                        pecentage = (checkedDay+1)/((date.today()-date(startDay[0],startDay[1],startDay[2])).days + 1))
+                                        percentage = (checkedDay+1)/((date.today()-date(startDay[0],startDay[1],startDay[2])).days + 1))
                                     )
     else:
         update.message.reply_text(Msg.userNotFound.format(
@@ -86,3 +91,10 @@ def checkin(update: Updater, context: CallbackContext) ->None:
             )
         )
 
+
+def ping(update: Updater, context: CallbackContext) ->None:
+    if update.effective_chat.id in config.adminIDs:
+        rplyText = '\n'.join(getSystemInformation())
+        
+        context.bot.send_message(chat_id=update.effective_chat.id, 
+                             text=rplyText)

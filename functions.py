@@ -1,7 +1,7 @@
 '''
 Author: Jonah Liu
 Date: 2022-01-25 18:30:21
-LastEditTime: 2022-01-27 14:40:10
+LastEditTime: 2022-02-09 15:57:50
 LastEditors: Jonah Liu
 Description:  Functions for pyTelegrambot
 '''
@@ -9,8 +9,10 @@ import sqlite3
 from datetime import date,time
 from telegram import Update
 from telegram.ext import Updater, CommandHandler,CallbackQueryHandler
+from pytypecho import Typecho,Post
 import config
 import os 
+import logging
 
 def registCommands(updater:Updater,cmdDict:dict):
     for funcStrName,funcName in cmdDict.items():
@@ -60,6 +62,21 @@ def findFiles(filePrefix:str,notesDir = config.notesDir ):
 
     return sendLst
 
+def publishToTypecho(url:str,content:str,title:str,username:str,passwd:str,cate=['灵修']):
+    logging.debug(f'url:{url};content:{content};username:{username};passwd:{passwd}')
+    typecho = Typecho(url,username=username,password=passwd)
+    typecho.new_post(Post(title=title,categories=cate,description=content),publish=True)
+    
 
+def getSystemInformation():
+    mem_usage = os.popen("free -m|grep Mem|awk '{print $2,$3,$4}'").read().strip().split(' ')
+    mem_text  = f"Memory Usage:\nTotal: {mem_usage[0]}M Used: {mem_usage[1]}M Free: {mem_usage[2]}M\n"
 
+    cpu_usage = os.popen("top -bi -n 1| awk '{print $2,$4}'").read().split('\n')[2].split(' ')
+    cpu_text  = f"CPU Usage:\n {cpu_usage[0]} us {cpu_usage[1]} sy\n"
+
+    disk_usage = os.popen("df -h |head -2 |tail -1 |awk '{print $2,$3,$4,$5}'").read().strip().split(' ')
+    disk_text  = f"Disk Usage:\nSize: {disk_usage[0]} Used: {disk_usage[1]} Avail: {disk_usage[2]} Use%: {disk_usage[3]}\n"
+
+    return [cpu_text,mem_text,disk_text]
 

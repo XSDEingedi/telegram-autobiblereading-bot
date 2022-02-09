@@ -1,7 +1,7 @@
 '''
 Author: Jonah Liu
 Date: 2022-01-25 19:43:50
-LastEditTime: 2022-01-27 13:42:26
+LastEditTime: 2022-02-09 15:37:34
 LastEditors: Jonah Liu
 Description: common vars
 '''
@@ -26,8 +26,6 @@ testTime     = time(hour=12,minute=47,tzinfo=pytz.timezone('Asia/Shanghai'))
 todayCount = -1
 
 
-
-
 Msg = stru()
 
 Msg.iAmMsg = "我是隐基底的读经机器人，但是读经的时候请不要做机器人~"
@@ -46,4 +44,15 @@ Msg.unscubscribeRplMsg = "退订成功！ byebye~"
 
 Msg.userNotFound = "Bonjour {user}!，数据库还没有您的信息，请先注册 /subscribe 再打卡哦！"
 Msg.alreadyChecked = "Bonjour {user} !，今天已经打过卡啦！"
-Msg.checkinRpl = "Bonjour {user}! \n今日已打卡！ \n\n 当前打卡总天数：{checkedDay}\n\n 上次打卡时间：{lastDay}。当前打卡率{percentage:.2%}"
+Msg.checkinRply = "Bonjour {user}! \n今日已打卡！ \n\n 当前打卡总天数：{checkedDay}\n\n 上次打卡时间：{lastDay}。当前打卡率{percentage:.2%}"
+
+
+adminIDs = [949189546]
+channelIDs = [-1001322280059, -1001723732299]
+
+Site = stru()
+Site.url = "https://blog.eingedixm.cf"
+Site.rpcUrl=Site.url+'/action/xmlrpc'
+# Site.username = os.environ['SITE_USERNAME']
+Site.username = 'telegrambot'
+Site.password = os.environ['SITE_PASSWD']
