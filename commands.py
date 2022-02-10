@@ -1,7 +1,7 @@
 '''
 Author: Jonah Liu
 Date: 2022-01-25 18:13:02
-LastEditTime: 2022-02-09 15:45:05
+LastEditTime: 2022-02-10 14:59:07
 LastEditors: Jonah Liu
 Description: commands for TeleBot
 '''
@@ -69,7 +69,7 @@ def checkin(update: Updater, context: CallbackContext) ->None:
 
     if ret:    
         _,lastday,checkedDay,isChecked,EncryName = ret
-        if len(EncryName) == 0:
+        if EncryName is None:
             updateDB(database,"UPDATE USERS SET ENCRY_NAME='%s'"%update.effective_user.first_name)
             
         startDay = list(map(int,_.split('-')))

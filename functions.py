@@ -1,12 +1,12 @@
 '''
 Author: Jonah Liu
 Date: 2022-01-25 18:30:21
-LastEditTime: 2022-02-09 15:57:50
+LastEditTime: 2022-02-10 14:46:05
 LastEditors: Jonah Liu
 Description:  Functions for pyTelegrambot
 '''
 import sqlite3
-from datetime import date,time
+from datetime import date,time,datetime
 from telegram import Update
 from telegram.ext import Updater, CommandHandler,CallbackQueryHandler
 from pytypecho import Typecho,Post
@@ -65,7 +65,7 @@ def findFiles(filePrefix:str,notesDir = config.notesDir ):
 def publishToTypecho(url:str,content:str,title:str,username:str,passwd:str,cate=['灵修']):
     logging.debug(f'url:{url};content:{content};username:{username};passwd:{passwd}')
     typecho = Typecho(url,username=username,password=passwd)
-    typecho.new_post(Post(title=title,categories=cate,description=content),publish=True)
+    typecho.new_post(Post(title=title,categories=cate,dateCreated=datetime.now(),description=content),publish=True)
     
 
 def getSystemInformation():
